@@ -4,15 +4,14 @@ const {
   verificarIntegridadDetallada,
   recalcularTodo
 } = require("../services/digitoVerificadorService");
-const { User, Post, Comment, Friendship, Calification, Bitacora } = require("../models");
+const { User, Post, Comment, Calification, Bitacora } = require("../models");
 
 // Mapa de modelos para operaciones masivas
 const MODELOS = {
   usuarios: User,        // Tabla: Usuarios
   posts: Post,           // Tabla: Posts
   comentarios: Comment,  // Tabla: Comments
-  amistades: Friendship, // Tabla: Friendships
-  calificaciones: Calification, // Tabla: Califications
+    calificaciones: Calification, // Tabla: Califications
   bitacora: Bitacora     // Tabla: Bitacora
 };
 
@@ -126,7 +125,6 @@ const verificarIntegridadTablaEspecifica = async (req, res) => {
  */
 const recalcularAbsolutamente = async (req, res) => {
   try {
-    console.log('🔄 Iniciando recálculo absoluto de todos los DVH...');
 
     const resultado = await recalcularTodo(MODELOS);
 

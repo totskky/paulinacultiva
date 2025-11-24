@@ -18,12 +18,15 @@ import {
   X,
   AlertTriangle,
   Flag,
-  XCircle
+  XCircle,
+  Utensils,
+  MessageCircle
 } from 'lucide-react';
 import { COLORS } from '../utils/colors';
 
 function ModeratorReportDialog({ open, onClose, onSubmit, report, type = 'content' }) {
   const [loading, setLoading] = useState(false);
+  const [contentDialogOpen, setContentDialogOpen] = useState(false);
 
   const handleResolve = async () => {
     setLoading(true);
@@ -173,18 +176,31 @@ function ModeratorReportDialog({ open, onClose, onSubmit, report, type = 'conten
               <Typography variant="body2" color={COLORS.mutedText} sx={{ mb: 1 }}>
                 Contenido:
               </Typography>
-              <Box sx={{
-                p: 2,
-                bgcolor: '#f5f5f5',
-                borderRadius: 1,
-                maxHeight: 100,
-                overflow: 'auto'
-              }}>
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: '#f5f5f5',
+                  borderRadius: 1,
+                  maxHeight: 100,
+                  overflow: 'auto',
+                  cursor: 'pointer',
+                  border: `1px solid ${COLORS.divider}`,
+                  '&:hover': {
+                    bgcolor: COLORS.principal + '10',
+                    borderColor: COLORS.principal + '30'
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+                onClick={() => setContentDialogOpen(true)}
+              >
                 <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
                   {report.reportType === 'post'
                     ? report.reportedContent?.titulo
                     : report.reportedContent?.contenido?.substring(0, 100) + '...'
                   }
+                </Typography>
+                <Typography variant="caption" sx={{ color: COLORS.principal, mt: 0.5, display: 'block' }}>
+                  🔍 Haz clic para ver contenido completo
                 </Typography>
               </Box>
             </Box>
@@ -194,7 +210,7 @@ function ModeratorReportDialog({ open, onClose, onSubmit, report, type = 'conten
         {report?.status === 'pending' && (
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              Este reporte está pendiente de revisión. Puedes marcarlo como revisado (conservar contenido), eliminar el contenido reportado, o descartar el reporte.
+              Este reporte está pendiente de revisión. Puedes marcarlo como revisado (conservar contenido) o eliminar el contenido reportado.
             </Typography>
           </Alert>
         )}
@@ -240,17 +256,6 @@ function ModeratorReportDialog({ open, onClose, onSubmit, report, type = 'conten
             >
               {loading ? 'Eliminando...' : '🗑️ Eliminar Contenido'}
             </Button>
-
-            <Button
-              onClick={handleDismiss}
-              variant="contained"
-              color="secondary"
-              disabled={loading}
-              startIcon={loading ? <CircularProgress size={16} /> : <XCircle size={16} />}
-              sx={{ flexGrow: 1 }}
-            >
-              {loading ? 'Descartando...' : '❌ Descartar Reporte'}
-            </Button>
           </>
         )}
 
@@ -262,6 +267,143 @@ function ModeratorReportDialog({ open, onClose, onSubmit, report, type = 'conten
           Cerrar
         </Button>
       </DialogActions>
+
+      {/* Content Detail Dialog */}
+      <Dialog
+        open={contentDialogOpen}
+        onClose={() => setContentDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: COLORS.paperBg,
+            color: COLORS.bodyText
+          }
+        }}
+      >
+        <DialogTitle sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 2,
+          borderBottom: `1px solid ${COLORS.divider}`
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {report?.reportType === 'post' ? <Utensils size={24} color={COLORS.principal} /> : <MessageCircle size={24} color={COLORS.principal} />}
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {report?.reportType === 'post' ? 'Publicación Reportada' : 'Comentario Reportado'}
+            </Typography>
+          </Box>
+          <IconButton onClick={() => setContentDialogOpen(false)} size="small">
+            <X />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 3 }}>
+          {report?.reportType === 'post' ? (
+            <Box>
+              {/* Post content */}
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: COLORS.bodyText }}>
+                {report?.reportedContent?.titulo}
+              </Typography>
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="body2" color={COLORS.mutedText} sx={{ mb: 1 }}>
+                  Ingredientes:
+                </Typography>
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: '#f8f9fa',
+                    borderRadius: 2,
+                    maxHeight: 200,
+                    overflow: 'auto',
+                    whiteSpace: 'pre-wrap',
+                    fontSize: '0.9rem',
+                    lineHeight: 1.4
+                  }}
+                >
+                  {report?.reportedContent?.ingredientes || 'No hay ingredientes disponibles'}
+                </Box>
+              </Box>
+
+              <Box>
+                <Typography variant="body2" color={COLORS.mutedText} sx={{ mb: 1 }}>
+                  Preparación:
+                </Typography>
+                <Box
+                  sx={{
+                    p: 2,
+                    bgcolor: '#f8f9fa',
+                    borderRadius: 2,
+                    maxHeight: 300,
+                    overflow: 'auto',
+                    whiteSpace: 'pre-wrap',
+                    fontSize: '0.9rem',
+                    lineHeight: 1.4
+                  }}
+                >
+                  {report?.reportedContent?.preparacion || 'No hay preparación disponible'}
+                </Box>
+              </Box>
+
+              {report?.reportedContent?.imagen && (
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  <Typography variant="body2" color={COLORS.mutedText} sx={{ mb: 1 }}>
+                    Imagen:
+                  </Typography>
+                  <img
+                    src={report.reportedContent.imagen}
+                    alt={report.reportedContent.titulo}
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '300px',
+                      borderRadius: '8px',
+                      objectFit: 'cover'
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+          ) : (
+            <Box>
+              {/* Comment content */}
+              <Typography variant="body2" color={COLORS.mutedText} sx={{ mb: 1 }}>
+                Comentario completo:
+              </Typography>
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: '#f8f9fa',
+                  borderRadius: 2,
+                  whiteSpace: 'pre-wrap',
+                  fontSize: '0.95rem',
+                  lineHeight: 1.5
+                }}
+              >
+                {report?.reportedContent?.contenido || 'No hay contenido disponible'}
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2, borderTop: `1px solid ${COLORS.divider}` }}>
+          <Button
+            onClick={() => setContentDialogOpen(false)}
+            variant="outlined"
+            sx={{
+              borderColor: COLORS.principal,
+              color: COLORS.principal,
+              '&:hover': {
+                borderColor: COLORS.oscuro,
+                bgcolor: 'rgba(255, 107, 53, 0.04)'
+              }
+            }}
+          >
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 }

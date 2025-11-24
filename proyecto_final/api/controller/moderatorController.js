@@ -128,18 +128,13 @@ const getInactiveUsers = async (req, res) => {
 
 // Actualizar estado de un reporte
 const updateReportStatus = async (req, res) => {
-  console.log('🚀 updateReportStatus llamado:', {
-    method: req.method,
-    url: req.originalUrl,
-    body: req.body,
-    params: req.params,
-    moderator: req.moderator ? { id: req.moderator.id, username: req.moderator.username } : null
-  });
 
   try {
     const { id } = req.params;
     const { status, action } = req.body; // action puede ser 'dismiss', 'resolve', 'delete_content'
     const moderatorId = req.moderator.id;
+
+    console.log('🔥 UPDATE REPORT STATUS - Request data:', { id, status, action });
 
     const report = await Report.findByPk(id);
     if (!report) {
@@ -158,17 +153,35 @@ const updateReportStatus = async (req, res) => {
     // Si se solicita eliminar contenido
     if (action === 'delete_content') {
       try {
+        console.log('🔥 DELETE CONTENT ACTION DETECTED');
+        console.log('🔥 Report data:', { id: report.id, reportType: report.reportType, reportedItemId: report.reportedItemId });
         if (report.reportType === 'post') {
           const post = await Post.findByPk(report.reportedItemId);
           if (!post) {
-            console.log(`❌ Post no encontrado para eliminar: ${report.reportedItemId}`);
             return res.status(404).json({
               success: false,
               message: 'Publicación no encontrada'
             });
           }
 
-          console.log(`🗑️ Eliminando post reportado: ${report.reportedItemId}`);
+          // Notificar al autor del post ANTES de eliminar el contenido
+          await Notification.create({
+            userId: post.autorId,
+            title: 'Publicación Eliminada',
+            message: 'Tu publicación ha sido eliminada por un moderador por violar las normas de la comunidad.',
+            type: 'content_removed',
+            isRead: false
+          });
+
+          // Emitir notificación en tiempo real
+          if (global.io) {
+            global.io.to(`user-${post.autorId}`).emit('new-notification', {
+              title: 'Publicación Eliminada',
+              message: 'Tu publicación ha sido eliminada por un moderador por violar las normas de la comunidad.',
+              type: 'content_removed',
+              createdAt: new Date()
+            });
+          }
 
           // PRIMERO: Obtener los IDs de comentarios ANTES de eliminarlos
           const commentsToDelete = await Comment.findAll({
@@ -185,14 +198,12 @@ const updateReportStatus = async (req, res) => {
                 reportedItemId: { [Op.in]: commentIds }
               }
             });
-            console.log(`🗑️ Reportes de ${commentIds.length} comentarios asociados eliminados`);
           }
 
           // SEGUNDO: Eliminar todos los comentarios asociados al post
           await Comment.destroy({
             where: { PostId: report.reportedItemId }
           });
-          console.log(`🗑️ Comentarios asociados eliminados`);
 
           // TERCERO: Eliminar reportes asociados al post
           await Report.destroy({
@@ -201,65 +212,26 @@ const updateReportStatus = async (req, res) => {
               reportedItemId: report.reportedItemId
             }
           });
-          console.log(`🗑️ Reportes asociados al post eliminados`);
 
           // CUARTO: Eliminar el post completamente (después de eliminar sus comentarios)
           await post.destroy();
-          console.log(`🗑️ Post eliminado exitosamente con destroy()`);
-
-          // Notificar al autor del post
-          await Notification.create({
-            userId: post.autorId,
-            title: 'Publicación Eliminada',
-            message: 'Tu publicación ha sido eliminada por un moderador por violar las normas de la comunidad.',
-            type: 'content_removed',
-            isRead: false,
-            relatedPostId: report.reportedItemId
-          });
-
-          // Emitir notificación en tiempo real
-          if (global.io) {
-            global.io.to(`user-${post.autorId}`).emit('new-notification', {
-              title: 'Publicación Eliminada',
-              message: 'Tu publicación ha sido eliminada por un moderador por violar las normas de la comunidad.',
-              type: 'content_removed',
-              createdAt: new Date()
-            });
-          }
 
         } else if (report.reportType === 'comment') {
           const comment = await Comment.findByPk(report.reportedItemId);
           if (!comment) {
-            console.log(`❌ Comentario no encontrado para eliminar: ${report.reportedItemId}`);
             return res.status(404).json({
               success: false,
               message: 'Comentario no encontrado'
             });
           }
 
-          console.log(`🗑️ Eliminando comentario reportado: ${report.reportedItemId}`);
-
-          // Eliminar reportes asociados al comentario
-          await Report.destroy({
-            where: {
-              reportType: 'comment',
-              reportedItemId: report.reportedItemId
-            }
-          });
-          console.log(`🗑️ Reportes asociados al comentario eliminados`);
-
-          // Eliminar el comentario completamente
-          await comment.destroy();
-          console.log(`🗑️ Comentario eliminado exitosamente con destroy()`);
-
-          // Notificar al autor del comentario
+          // Notificar al autor del comentario ANTES de eliminar el contenido
           await Notification.create({
             userId: comment.autorId,
             title: 'Comentario Eliminado',
             message: 'Tu comentario ha sido eliminado por un moderador por violar las normas de la comunidad.',
             type: 'content_removed',
-            isRead: false,
-            relatedCommentId: report.reportedItemId
+            isRead: false
           });
 
           // Emitir notificación en tiempo real
@@ -271,6 +243,17 @@ const updateReportStatus = async (req, res) => {
               createdAt: new Date()
             });
           }
+
+          // Eliminar reportes asociados al comentario
+          await Report.destroy({
+            where: {
+              reportType: 'comment',
+              reportedItemId: report.reportedItemId
+            }
+          });
+
+          // Eliminar el comentario completamente
+          await comment.destroy();
         }
       } catch (error) {
         console.error('Error al eliminar contenido reportado:', error);
@@ -281,6 +264,7 @@ const updateReportStatus = async (req, res) => {
       }
 
       // Si se eliminó contenido, devolver respuesta exitosa inmediatamente
+      console.log('🔥 DELETE CONTENT SUCCESSFUL - Sending response');
       res.json({
         success: true,
         message: `${report.reportType === 'post' ? 'Publicación' : 'Comentario'} eliminado correctamente`,
@@ -289,179 +273,41 @@ const updateReportStatus = async (req, res) => {
       return; // Importante: salir de la función para evitar procesamiento adicional
     }
 
-    // Si se descarta el reporte, eliminar el contenido automáticamente
+    // Si se descarta el reporte, solo notificar al reportante sin eliminar contenido
     if (status === 'dismissed') {
       try {
-        console.log(`🗑️ Descartando reporte ${id} y eliminando contenido automáticamente`);
+        // Enviar notificación al usuario que reportó
+        await Notification.create({
+          userId: report.reporterId,
+          title: 'Reporte Descartado',
+          message: 'Tu reporte ha sido revisado y descartado por el equipo de moderación. El contenido reportado no viola las normas de la comunidad.',
+          type: 'report_dismissed',
+          isRead: false
+        });
 
-        if (report.reportType === 'post') {
-          const post = await Post.findByPk(report.reportedItemId);
-          if (!post) {
-            console.log(`❌ Post no encontrado para eliminar: ${report.reportedItemId}`);
-            return res.status(404).json({
-              success: false,
-              message: 'Publicación no encontrada'
-            });
-          }
-
-          console.log(`🗑️ Eliminando post automáticamente (status dismissed): ${report.reportedItemId}`);
-
-          // Iniciar transacción para garantizar consistencia
-          const t = await sequelize.transaction();
-
-          try {
-            // 1. Obtener comentarios asociados al post
-            const comments = await Comment.findAll({
-              where: { PostId: report.reportedItemId },
-              transaction: t,
-              attributes: ['id']
-            });
-
-            const commentIds = comments.map(c => c.id);
-
-            // 2. Eliminar reportes de comentarios asociados
-            if (commentIds.length > 0) {
-              await Report.destroy({
-                where: {
-                  reportType: 'comment',
-                  reportedItemId: { [Op.in]: commentIds }
-                },
-                transaction: t
-              });
-              console.log(`🗑️ Eliminados ${commentIds.length} reportes de comentarios`);
-            }
-
-            // 3. Eliminar comentarios del post
-            await Comment.destroy({
-              where: { PostId: report.reportedItemId },
-              transaction: t
-            });
-            console.log(`🗑️ Eliminados comentarios del post`);
-
-            // 4. Eliminar todos los reportes del post (incluyendo el actual)
-            await Report.destroy({
-              where: {
-                reportType: 'post',
-                reportedItemId: report.reportedItemId
-              },
-              transaction: t
-            });
-            console.log(`🗑️ Eliminados reportes del post`);
-
-            // 5. Eliminar el post
-            await post.destroy({ transaction: t });
-            console.log(`🗑️ Post eliminado exitosamente`);
-
-            // Confirmar transacción
-            await t.commit();
-
-            // Notificar al autor del post
-            try {
-              await Notification.create({
-                userId: post.autorId,
-                title: 'Publicación Eliminada',
-                message: 'Tu publicación ha sido eliminada por violar las normas de la comunidad.',
-                type: 'content_removed',
-                isRead: false,
-                relatedPostId: report.reportedItemId
-              });
-
-              // Emitir notificación en tiempo real
-              if (global.io) {
-                global.io.to(`user-${post.autorId}`).emit('new-notification', {
-                  title: 'Publicación Eliminada',
-                  message: 'Tu publicación ha sido eliminada por violar las normas de la comunidad.',
-                  type: 'content_removed',
-                  createdAt: new Date()
-                });
-              }
-            } catch (notifError) {
-              console.error('Error al enviar notificación:', notifError);
-              // No fallar si la notificación falla
-            }
-
-          } catch (transactionError) {
-            await t.rollback();
-            throw transactionError;
-          }
-
-        } else if (report.reportType === 'comment') {
-          const comment = await Comment.findByPk(report.reportedItemId);
-          if (!comment) {
-            console.log(`❌ Comentario no encontrado para eliminar: ${report.reportedItemId}`);
-            return res.status(404).json({
-              success: false,
-              message: 'Comentario no encontrado'
-            });
-          }
-
-          console.log(`🗑️ Eliminando comentario automáticamente (status dismissed): ${report.reportedItemId}`);
-
-          // Iniciar transacción
-          const t = await sequelize.transaction();
-
-          try {
-            // 1. Eliminar reportes del comentario (incluyendo el actual)
-            await Report.destroy({
-              where: {
-                reportType: 'comment',
-                reportedItemId: report.reportedItemId
-              },
-              transaction: t
-            });
-            console.log(`🗑️ Eliminados reportes del comentario`);
-
-            // 2. Eliminar el comentario
-            await comment.destroy({ transaction: t });
-            console.log(`🗑️ Comentario eliminado exitosamente`);
-
-            // Confirmar transacción
-            await t.commit();
-
-            // Notificar al autor del comentario
-            try {
-              await Notification.create({
-                userId: comment.autorId,
-                title: 'Comentario Eliminado',
-                message: 'Tu comentario ha sido eliminado por violar las normas de la comunidad.',
-                type: 'content_removed',
-                isRead: false,
-                relatedCommentId: report.reportedItemId
-              });
-
-              // Emitir notificación en tiempo real
-              if (global.io) {
-                global.io.to(`user-${comment.autorId}`).emit('new-notification', {
-                  title: 'Comentario Eliminado',
-                  message: 'Tu comentario ha sido eliminado por violar las normas de la comunidad.',
-                  type: 'content_removed',
-                  createdAt: new Date()
-                });
-              }
-            } catch (notifError) {
-              console.error('Error al enviar notificación:', notifError);
-              // No fallar si la notificación falla
-            }
-
-          } catch (transactionError) {
-            await t.rollback();
-            throw transactionError;
-          }
+        // Emitir notificación en tiempo real
+        if (global.io) {
+          global.io.to(`user-${report.reporterId}`).emit('new-notification', {
+            title: 'Reporte Descartado',
+            message: 'Tu reporte ha sido revisado y descartado por el equipo de moderación. El contenido reportado no viola las normas de la comunidad.',
+            type: 'report_dismissed',
+            createdAt: new Date()
+          });
         }
 
         // Devolver respuesta exitosa
         res.json({
           success: true,
-          message: `${report.reportType === 'post' ? 'Publicación' : 'Comentario'} eliminado correctamente por dismiss`,
+          message: 'Reporte descartado correctamente. No se ha eliminado ningún contenido.',
           report
         });
         return;
 
       } catch (error) {
-        console.error('Error al eliminar contenido automáticamente por dismiss:', error);
+        console.error('Error al descartar reporte:', error);
         return res.status(500).json({
           success: false,
-          message: 'Error al eliminar el contenido automáticamente',
+          message: 'Error al descartar el reporte',
           error: error.message
         });
       }
@@ -493,9 +339,7 @@ const updateReportStatus = async (req, res) => {
         title: 'Reporte Revisado',
         message: 'Tu reporte ha sido revisado por el equipo de moderación. Gracias por tu colaboración.',
         type: 'report_reviewed',
-        isRead: false,
-        relatedPostId: report.reportType === 'post' ? report.reportedItemId : null,
-        relatedCommentId: report.reportType === 'comment' ? report.reportedItemId : null
+        isRead: false
       });
 
       // Emitir notificación en tiempo real
@@ -511,6 +355,7 @@ const updateReportStatus = async (req, res) => {
       console.error('Error al enviar notificación al reportante:', error);
     }
 
+    console.log('🔥 REPORT UPDATED SUCCESSFULLY - Sending final response');
     res.json({
       success: true,
       message: 'Reporte actualizado correctamente',

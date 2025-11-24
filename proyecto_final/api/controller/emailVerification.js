@@ -66,14 +66,14 @@ async function sendVerificationCode(req, res) {
     // Actualizar tiempo de último envío
     lastSentTime[email] = Date.now();
 
-    // Diseño del email siguiendo la estética de la página
+    // Diseño del email siguiendo la estética moderna roja igual al email de recuperación
     const emailHTML = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Verificación de Email - Paulina Cultura</title>
+        <title>Verificación de Email - Paulina Cultiva</title>
         <style>
           * {
             margin: 0;
@@ -100,7 +100,7 @@ async function sendVerificationCode(req, res) {
           }
 
           .header {
-            background-color: #d13727;
+            background: linear-gradient(135deg, #d13727, #8b1e14);
             padding: 30px;
             text-align: center;
             color: white;
@@ -125,8 +125,8 @@ async function sendVerificationCode(req, res) {
           }
 
           .verification-code {
-            background-color: #f76c5e;
-            color: white;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            color: #d13727;
             font-size: 36px;
             font-weight: 700;
             letter-spacing: 8px;
@@ -135,7 +135,9 @@ async function sendVerificationCode(req, res) {
             margin: 30px 0;
             display: inline-block;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            box-shadow: 0 4px 12px rgba(247, 108, 94, 0.2);
+            box-shadow: 0 4px 12px rgba(209, 55, 39, 0.2);
+            border: 2px solid #d13727;
+            font-family: 'Courier New', monospace;
           }
 
           .instructions {
@@ -145,7 +147,7 @@ async function sendVerificationCode(req, res) {
           }
 
           .footer {
-            background-color: #f9f2ec;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             padding: 20px;
             text-align: center;
             font-size: 14px;
@@ -158,6 +160,41 @@ async function sendVerificationCode(req, res) {
             color: #d13727;
             font-weight: 700;
             text-decoration: none;
+          }
+
+          .steps {
+            background: #fef6f0;
+            border-left: 4px solid #f76c5e;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+          }
+
+          .steps h3 {
+            margin-top: 0;
+            color: #d13727;
+            font-size: 16px;
+          }
+
+          .steps ol {
+            color: #555;
+            line-height: 1.8;
+            padding-left: 20px;
+          }
+
+          .security-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+          }
+
+          .security-note p {
+            margin: 0;
+            color: #856404;
+            font-size: 14px;
           }
 
           @media (max-width: 600px) {
@@ -186,33 +223,51 @@ async function sendVerificationCode(req, res) {
           }
         </style>
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Paulina Cultura</h1>
-            <p>Verificación de Email</p>
+      <body style="margin: 0; padding: 0; font-family: 'Arial', sans-serif; background-color: #f5f5f5;">
+        <div class="container" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <div class="header" style="background: linear-gradient(135deg, #d13727, #8b1e14); padding: 30px 20px; text-align: center; color: white;">
+            <h1 style="font-size: 32px; margin: 0; font-weight: bold;">🌱 Paulina Cultiva</h1>
+            <p style="font-size: 18px; margin: 10px 0 0; opacity: 0.9;">Verificación de Email</p>
           </div>
 
-          <div class="content">
-            <p class="instructions">
-              ¡Hola! Para completar tu registro en <strong>Paulina Cultura</strong>,
-              ingresa el siguiente código de verificación:
+          <div class="content" style="padding: 40px 20px;">
+            <p class="greeting" style="font-size: 18px; color: #333; margin-bottom: 20px; text-align: center;">
+              ¡Hola! 👋
             </p>
 
-            <div class="verification-code">
-              ${code}
+            <p class="instructions" style="font-size: 16px; color: #555; line-height: 1.6; margin-bottom: 30px; text-align: center;">
+              Gracias por registrarte en Paulina Cultiva. Para completar tu registro, ingresa el siguiente código de 6 dígitos en la aplicación:
+            </p>
+
+            <div class="verification-code" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); border: 2px solid #d13727; border-radius: 12px; padding: 25px; text-align: center; margin: 30px 0;">
+              <div style="font-size: 36px; font-weight: bold; color: #d13727; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                ${code}
+              </div>
             </div>
 
-            <p class="instructions">
-              Este código expirará en 10 minutos.<br>
-              Si no solicitaste este código, puedes ignorar este email.
-            </p>
+            <div class="steps" style="background: #fef6f0; border-left: 4px solid #f76c5e; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+              <h3 style="margin-top: 0; color: #d13727; font-size: 16px;">Pasos a seguir:</h3>
+              <ol style="color: #555; line-height: 1.8; padding-left: 20px;">
+                <li>Copia el código de 6 dígitos que aparece arriba</li>
+                <li>Ingresa el código en la aplicación de Paulina Cultiva</li>
+                <li>Listo! Tu cuenta quedará verificada y activa</li>
+                <li>Comienza a compartir tus recetas y sabores</li>
+              </ol>
+            </div>
+
+            <div class="security-note" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #856404; font-size: 14px; text-align: center;">
+                🔒 <strong>Seguridad:</strong> Este código expirará en 10 minutos. Si no creaste esta cuenta, ignora este email.
+              </p>
+            </div>
           </div>
 
-          <div class="footer">
-            <p>
-              © 2024 <a href="#" class="logo-text">Paulina Cultura</a><br>
-              Todos los derechos reservados
+          <div class="footer" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
+            <p style="margin: 0; color: #666; font-size: 14px;">
+              ¡Cultivando sabores juntos con ❤️
+            </p>
+            <p style="margin: 10px 0 0; color: #999; font-size: 12px;">
+              © 2024 Paulina Cultiva • Todos los derechos reservados
             </p>
           </div>
         </div>
@@ -224,7 +279,7 @@ async function sendVerificationCode(req, res) {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Código de Verificación - Paulina Cultura',
+      subject: 'Código de Verificación - Paulina Cultiva',
       html: emailHTML
     };
 
@@ -233,7 +288,6 @@ async function sendVerificationCode(req, res) {
 
     // En desarrollo, mostrar código en consola
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`📧 Código de verificación para ${email}: ${code}`);
     }
 
     res.json({

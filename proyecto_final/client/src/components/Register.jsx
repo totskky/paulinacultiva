@@ -60,52 +60,35 @@ export default function Register() {
         email: form.email,
         password: form.password,
       });
-      showToast("¡Registro exitoso! Por favor, espera un momento mientras verificamos tu email...", "info", 3000);
-      // Pequeña espera antes de enviar el email (para evitar problemas con cooldown)
-      setTimeout(async () => {
-        try {
-          // Enviar email de verificación
-          const verificationResponse = await axios.post("http://localhost:3000/send-verification", {
-            email: form.email
-          });
-          if (verificationResponse.data.success) {
-            // En desarrollo, mostrar el código en la consola
-            if (verificationResponse.data.verificationCode) {
-              console.log("🔢 Código de verificación (desarrollo):", verificationResponse.data.verificationCode);
-            }
-            showToast("📧 Email enviado! Revisa tu bandeja de entrada", "success", 3000);
-            // Navegar a la página de verificación
-            setTimeout(() => {
-              navigate("/email-verification", {
-                state: {
-                  email: form.email,
-                  verificationCode: verificationResponse.data.verificationCode
-                }
-              });
-            }, 1000);
-          } else {
-            throw new Error("Error al enviar email de verificación");
-          }
-        } catch (emailError) {
-          console.error("Error al enviar email:", emailError);
-          // Aún navegar a la página de verificación aunque falle el email
+
+      if (data.success) {
+        // En desarrollo, mostrar el código en la consola
+        if (data.verificationCode) {
+          console.log("🔢 Código de verificación (desarrollo):", data.verificationCode);
+        }
+
+        showToast("📧 Email enviado! Revisa tu bandeja de entrada para completar el registro", "success", 4000);
+
+        // Navegar a la página de verificación
+        setTimeout(() => {
           navigate("/email-verification", {
             state: {
               email: form.email,
-              error: "No se pudo enviar el email, pero puedes intentar nuevamente"
+              verificationCode: data.verificationCode,
+              isNewRegistration: true // Indicar que es un registro nuevo
             }
           });
-          showToast("⚠️ No se pudo enviar el email. Intenta nuevamente.", "warning", 4000);
-        }
-      }, 2000); // 2 segundos de espera
+        }, 1500);
+      } else {
+        throw new Error(data.message || "Error en el registro");
+      }
     } catch (e) {
       const errorMessage = e.response?.data?.message || e.response?.data?.errors?.[0] || "Error al registrarse. Intenta nuevamente";
       setError(errorMessage);
       showToast(errorMessage, "error", 4000);
       console.error(e);
-      setLoading(false); // Solo en caso de error
+      setLoading(false);
     }
-    // NOTA: No setLoading(false) aquí - la animación continua hasta la redirección
   };
   const handleKeyPress = (event) => {
     if (event.key === 'Enter' && !loading) {

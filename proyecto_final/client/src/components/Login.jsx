@@ -21,9 +21,9 @@ export default function Login() {
     if (location.state?.message) {
       showToast(location.state.message, "success", 3000);
       // Limpiar el estado para que no se muestre nuevamente
-      window.history.replaceState({}, document.title);
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, showToast]);
+  }, [location.state?.message]);
 
   const fetchLogin = async () => {
     // Prevenir múltiples envíos
@@ -64,6 +64,15 @@ export default function Login() {
         status === 401
           ? "Email o contraseña incorrectos"
           : backendMsg || "Error al iniciar sesión. Intenta nuevamente";
+
+      // Manejar caso de cuenta desactivada
+      if (status === 403 && backendMsg && backendMsg.includes("Cuenta desactivada")) {
+        // Redirigir a pantalla especial de cuenta desactivada
+        navigate("/inactive-account", {
+          state: { email: email }
+        });
+        return;
+      }
 
       // Manejar caso de email no verificado
       if (e.response?.data?.requiresEmailVerification) {

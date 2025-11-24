@@ -11,7 +11,6 @@ const createReport = async (req, res) => {
     // Determinar tipo de reporte e ID basado en los parámetros
     let reportType, reportedItemId, itemName;
 
-    console.log('🔍 Debug reporte:', { postId, commentId, body: req.body, params: req.params });
 
     if (commentId) {
       reportType = 'comment';
@@ -23,7 +22,6 @@ const createReport = async (req, res) => {
       } catch (error) {
         itemName = 'Comentario';
       }
-      console.log('📝 Reportando comentario:', { reportType, reportedItemId, itemName });
     } else if (postId) {
       reportType = 'post';
       reportedItemId = postId;
@@ -34,7 +32,6 @@ const createReport = async (req, res) => {
       } catch (error) {
         itemName = 'Publicación';
       }
-      console.log('📄 Reportando publicación:', { reportType, reportedItemId, itemName });
     } else {
       return res.status(400).json({
         success: false,
@@ -43,7 +40,6 @@ const createReport = async (req, res) => {
     }
 
     // Validar que no exista un reporte previo del mismo usuario para el mismo item
-    console.log(`🔍 Buscando reportes existentes para:`, { reporterId, reportType, reportedItemId });
 
     const existingReport = await Report.findOne({
       where: {
@@ -54,12 +50,6 @@ const createReport = async (req, res) => {
       }
     });
 
-    console.log(`📋 Reporte existente encontrado:`, existingReport ? {
-      id: existingReport.id,
-      createdAt: existingReport.createdAt,
-      status: existingReport.status
-    } : 'No se encontraron reportes existentes');
-
     if (existingReport) {
       return res.status(400).json({
         success: false,
@@ -68,23 +58,12 @@ const createReport = async (req, res) => {
     }
 
     // Verificar que el contenido existe
-    console.log(`🔍 Verificando existencia del contenido:`, { reportType, reportedItemId });
 
     let content;
     if (reportType === 'post') {
       content = await Post.findByPk(reportedItemId);
-      console.log(`📄 Post encontrado:`, content ? {
-        id: content.id,
-        titulo: content.titulo,
-        estado: content.estado
-      } : 'Post no encontrado');
     } else if (reportType === 'comment') {
       content = await Comment.findByPk(reportedItemId);
-      console.log(`💬 Comentario encontrado:`, content ? {
-        id: content.id,
-        contenido: content.contenido?.substring(0, 50),
-        estado: content.estado
-      } : 'Comentario no encontrado');
     }
 
     if (!content) {
@@ -102,7 +81,6 @@ const createReport = async (req, res) => {
       });
     }
 
-    console.log(`📋 Creando reporte:`, { reporterId, reportType, reportedItemId, reason, description });
 
     // Crear el reporte
     const report = await Report.create({
@@ -113,7 +91,6 @@ const createReport = async (req, res) => {
       description
     });
 
-    console.log(`✅ Reporte creado exitosamente:`, { id: report.id, createdAt: report.createdAt });
 
     // Obtener información del reportante para la notificación
     const reporterUser = await User.findByPk(reporterId);

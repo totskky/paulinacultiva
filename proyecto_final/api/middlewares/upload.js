@@ -41,8 +41,6 @@ const upload = multer({
 
 // Exportar el middleware para subir una sola foto con logs
 const uploadSingle = (req, res, next) => {
-  console.log('📸 UPLOAD MIDDLEWARE - Iniciando...');
-  console.log('📸 UPLOAD MIDDLEWARE - Content-Type:', req.get('Content-Type'));
 
   upload.single('foto')(req, res, (err) => {
     if (err) {
@@ -50,15 +48,6 @@ const uploadSingle = (req, res, next) => {
       return res.status(400).json({ message: 'Error al subir archivo: ' + err.message });
     }
 
-    console.log('📸 UPLOAD MIDDLEWARE - Archivo recibido:', req.file ? {
-      filename: req.file.filename,
-      originalname: req.file.originalname,
-      size: req.file.size,
-      mimetype: req.file.mimetype,
-      path: req.file.path
-    } : null);
-
-    console.log('📸 UPLOAD MIDDLEWARE - Body keys:', Object.keys(req.body));
 
     next();
   });

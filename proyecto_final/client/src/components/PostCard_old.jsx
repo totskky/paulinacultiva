@@ -224,9 +224,9 @@ export default function PostCard({ post, onRatingChange, onFavoriteToggle, onCom
   const handleDeleteConfirm = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log('🗑️ Intentando eliminar receta ID como moderador:', post.id);
+      console.log('🗑️ Intentando eliminar receta ID:', post.id);
 
-      const response = await fetch(`http://localhost:3000/api/moderator/content/post/${post.id}`, {
+      const response = await fetch(`http://localhost:3000/recipes/${post.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -237,7 +237,7 @@ export default function PostCard({ post, onRatingChange, onFavoriteToggle, onCom
       const data = await response.json();
       console.log('🗑️ Respuesta del servidor:', response.status, data);
 
-      if (response.ok && data.success) {
+      if (response.ok) {
         if (onDelete) {
           onDelete(post.id);
         }
@@ -1588,7 +1588,7 @@ export default function PostCard({ post, onRatingChange, onFavoriteToggle, onCom
                   <Rating
                     name={`rating-${post.id}`}
                     value={rating}
-                    precision={1}
+                    precision={0.5}
                     max={5}
                     onChange={handleRatingChange}
                     disabled={isRated || !currentUserId}

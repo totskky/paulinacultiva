@@ -159,6 +159,7 @@ export default function PasswordRecovery() {
     }
 
     setIsSubmitting(true);
+    let resetSuccess = false;
 
     try {
       const { data } = await axios.post("http://localhost:3000/reset-password", {
@@ -168,19 +169,24 @@ export default function PasswordRecovery() {
       });
 
       if (data.success) {
-        showToast("Contraseña actualizada exitosamente", "success", 3000);
+        resetSuccess = true;
+        showToast("Contraseña actualizada exitosamente. Redirigiendo...", "success", 3000);
 
+        // Mantener el loading activo durante la redirección
         setTimeout(() => {
           navigate("/login", {
             state: { message: "Contraseña actualizada. Inicia sesión con tu nueva contraseña." }
           });
-        }, 2000);
+        }, 3000); // Aumentado a 3 segundos para dar tiempo al usuario
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error al actualizar contraseña";
       showToast(errorMessage, "error", 4000);
     } finally {
-      setIsSubmitting(false);
+      // Solo quitamos el loading si no hubo éxito
+      if (!resetSuccess) {
+        setIsSubmitting(false);
+      }
     }
   };
 

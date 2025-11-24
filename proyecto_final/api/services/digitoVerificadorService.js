@@ -219,7 +219,6 @@ async function recalcularTodo(modelos) {
 
   for (const [nombreTabla, modelo] of Object.entries(modelos)) {
     try {
-      console.log(`🔄 Recalculando DVH/DVV para tabla: ${nombreTabla}`);
 
       const resultado = await actualizarDigitosVerificadores(modelo, nombreTabla);
 
@@ -231,7 +230,6 @@ async function recalcularTodo(modelos) {
           sumaDVH: resultado.dvv?.sumaDVH || 0
         });
 
-        console.log(`✅ ${nombreTabla}: ${resultado.dvh?.registrosActualizados || 0} registros, suma DVH: ${resultado.dvv?.sumaDVH || 0}`);
       } else {
         errores.push({
           tabla: nombreTabla,

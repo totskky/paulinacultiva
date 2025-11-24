@@ -57,7 +57,6 @@ const calificatePost = async (req, res) => {
       );
     }
 
-    console.log(`📊 Calificación guardada - Post ${postId}: ${averageRating.toFixed(1)} (${totalRatings} calificaciones)`);
 
     res.status(201).json({
       message: existing ? "Calificación actualizada con éxito" : "Post calificado con éxito",

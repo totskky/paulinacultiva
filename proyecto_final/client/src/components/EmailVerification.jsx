@@ -53,11 +53,21 @@ export default function EmailVerification() {
 
       if (data.success) {
         setIsVerified(true);
-        showToast("¡Email verificado exitosamente!", "success", 3000);
+        const isNewRegistration = location.state?.isNewRegistration || false;
+
+        if (isNewRegistration) {
+          showToast("¡Registro completado exitosamente!", "success", 3000);
+        } else {
+          showToast("¡Email verificado exitosamente!", "success", 3000);
+        }
 
         setTimeout(() => {
           navigate("/login", {
-            state: { message: "Email verificado exitosamente. Ya puedes iniciar sesión." }
+            state: {
+              message: isNewRegistration
+                ? "¡Tu cuenta ha sido creada exitosamente! Ya puedes iniciar sesión."
+                : "Email verificado exitosamente. Ya puedes iniciar sesión."
+            }
           });
         }, 2000);
       }
@@ -71,16 +81,18 @@ export default function EmailVerification() {
 
   const handleResendCode = async () => {
     if (!email) {
-      showToast("Por favor, ingresa tu email", "error", 3000);
+      showToast("No hay email disponible para reenviar el código", "error", 3000);
       return;
     }
 
     setIsResending(true);
 
     try {
-      const { data } = await axios.post("http://localhost:3000/send-verification", {
-        email
-      });
+      // Usar el endpoint de reenvío para cualquier caso (nuevo registro o existente)
+      const endpoint = "http://localhost:3000/send-verification";
+      const bodyData = { email };
+
+      const { data } = await axios.post(endpoint, bodyData);
 
       if (data.success) {
         showToast("Código reenviado exitosamente", "success", 3000);
@@ -88,10 +100,8 @@ export default function EmailVerification() {
         // Iniciar cooldown de 60 segundos
         setResendCooldown(60);
 
-        // En desarrollo, mostrar el código en la consola
-        if (data.verificationCode) {
-          console.log("🔢 Código de verificación (desarrollo):", data.verificationCode);
-        }
+              } else {
+        throw new Error(data.message || "Error al reenviar el código");
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Error al reenviar el código";
@@ -215,10 +225,21 @@ export default function EmailVerification() {
               variant="body2"
               sx={{
                 color: COLORS.bodyText,
-                mb: 3
+                mb: 1
               }}
             >
-              Ingresa el código de 6 dígitos que enviamos a tu email
+              Enviamos un código de 6 dígitos a:
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: COLORS.primary,
+                fontWeight: "600",
+                mb: 3,
+                textAlign: "center"
+              }}
+            >
+              {email}
             </Typography>
           </Box>
 
@@ -241,35 +262,6 @@ export default function EmailVerification() {
 
           <form onSubmit={handleVerifyCode}>
             <Stack spacing={3}>
-              <TextField
-                fullWidth
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                variant="outlined"
-                required
-                disabled={isSubmitting}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: COLORS.inputBorder,
-                    },
-                    "&:hover fieldset": {
-                      borderColor: COLORS.primary,
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: COLORS.primary,
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: COLORS.bodyText,
-                  },
-                  "& .MuiInputBase-input": {
-                    color: COLORS.bodyText,
-                  },
-                }}
-              />
 
               <TextField
                 fullWidth
@@ -341,7 +333,7 @@ export default function EmailVerification() {
                 fullWidth
                 variant="outlined"
                 onClick={handleResendCode}
-                disabled={isResending || !email || resendCooldown > 0}
+                disabled={isResending || resendCooldown > 0}
                 sx={{
                   py: 1.5,
                   borderColor: COLORS.primary,

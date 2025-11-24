@@ -11,7 +11,6 @@ const {
   Post,
   Comment,
   Calification,
-  Permiso,
   Bitacora,
   Notification
 } = require('./models');
@@ -31,7 +30,11 @@ const {
   updateUsername,
   requestPasswordReset,
   verifyResetCode,
-  resetPassword
+  resetPassword,
+  scheduleCleanup,
+  reactivateAccount,
+  permanentDeleteAccount,
+  getInactiveAccountInfo
 } = require('./controller/user');
 const {
   createReport,
@@ -129,14 +132,6 @@ global.io = io;
 
 // Configurar eventos de Socket.IO
 io.on('connection', (socket) => {
-  console.log('🔌 Usuario conectado:', socket.id);
-
-  // Unirse a sala de usuario para notificaciones específicas
-  socket.on('join-user-room', (userId) => {
-    socket.join(`user-${userId}`);
-    console.log(`Usuario ${userId} se unió a su sala personal`);
-  });
-
   // Eventos de notificaciones en tiempo real
   socket.on('like-post', (data) => {
     socket.to(`user-${data.postAuthorId}`).emit('post-liked', {
@@ -151,20 +146,9 @@ io.on('connection', (socket) => {
       comment: data.comment
     });
   });
-
-  socket.on('disconnect', () => {
-    console.log('❌ Usuario desconectado:', socket.id);
-  });
 });
 
 
-// Middleware global para depurar TODAS las peticiones
-server.use((req, res, next) => {
-  console.log(`🌍 GLOBAL MIDDLEWARE - ${req.method} ${req.url}`);
-  console.log(`🌍 GLOBAL MIDDLEWARE - Headers:`, req.get('Content-Type'));
-  console.log(`🌍 GLOBAL MIDDLEWARE - IP:`, req.ip);
-  next();
-});
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 
@@ -223,6 +207,11 @@ server.post('/request-password-reset', requestPasswordReset);
 server.post('/password-reset-request', requestPasswordReset); // Para compatibilidad con frontend
 server.post('/verify-reset-code', verifyResetCode);
 server.post('/reset-password', resetPassword);
+
+// Gestión de cuentas desactivadas
+server.post('/reactivate-account', reactivateAccount);
+server.post('/permanent-delete-account', permanentDeleteAccount);
+server.get('/inactive-account-info', getInactiveAccountInfo);
 
 // Recuperación de contraseña (sistema antiguo con tokens - mantener por compatibilidad)
 // server.post('/password-reset-request', requestPasswordReset);
@@ -307,8 +296,8 @@ server.put('/api/moderator/users/:userId/status', isAuth, isModerator, toggleUse
 server.delete('/api/moderator/content/:type/:id', isAuth, isModerator, deleteContent);
 server.get('/api/moderator/stats', isAuth, isModerator, getModeratorStats);
 
-// Verificación de email - Comentar temporalmente para aislar el problema
-// server.use('/', verificationRoutes);
+// Verificación de email
+server.use('/', verificationRoutes);
 
 // Endpoint de prueba para verificar imágenes
 server.get('/test-image', (req, res) => {
@@ -329,14 +318,9 @@ server.get('/test-image', (req, res) => {
 async function startServer() {
   try {
     const sequelize = await initDatabase();
-    console.log('Base de datos conectada');
-
-
     await sequelize.sync({ force: false });
-    console.log('Tablas sincronizadas');
 
     // Inicializar automáticamente los dígitos verificadores (temporalmente deshabilitado)
-    // console.log('⚙️ Inicializando sistema de integridad de datos...');
     // await inicializarDigitosVerificadores({
     //   usuarios: User,
     //   posts: Post,
@@ -345,6 +329,9 @@ async function startServer() {
     //   calificaciones: Calification,
     //   bitacora: Bitacora
     // });
+
+    // Iniciar sistema de limpieza automática de cuentas inactivas
+    scheduleCleanup();
 
     httpServer.listen(3000, () => {
       console.log('El server se está ejecutando en el puerto 3000');

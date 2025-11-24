@@ -3,10 +3,7 @@ const {
   User,
   Post,
   Comment,
-  Category,
   Calification,
-  Permission,
-  Friendship,
   DigitoVerificador
 } = require('../models');
 
@@ -27,10 +24,7 @@ async function actualizarIntegridadGeneral() {
       { modelo: User, nombre: 'Usuarios' },
       { modelo: Post, nombre: 'Posts' },
       { modelo: Comment, nombre: 'Comentarios' },
-      { modelo: Category, nombre: 'Categories' },
-      { modelo: Calification, nombre: 'Calificaciones' },
-      { modelo: Permission, nombre: 'Permisos' },
-      { modelo: Friendship, nombre: 'Amistades' }
+      { modelo: Calification, nombre: 'Calificaciones' }
     ];
 
     let totalRegistrosActualizados = 0;
@@ -88,10 +82,7 @@ async function verificarIntegridad() {
       { modelo: User, nombre: 'Usuarios' },
       { modelo: Post, nombre: 'Posts' },
       { modelo: Comment, nombre: 'Comentarios' },
-      { modelo: Category, nombre: 'Categories' },
-      { modelo: Calification, nombre: 'Calificaciones' },
-      { modelo: Permission, nombre: 'Permisos' },
-      { modelo: Friendship, nombre: 'Amistades' }
+      { modelo: Calification, nombre: 'Calificaciones' }
     ];
 
     let totalInconsistencias = 0;

@@ -3,7 +3,6 @@ const { User } = require('./User');
 const { Post } = require('./Post');
 const { Comment } = require('./Comment');
 const { Calification } = require('./Calification');
-const { Permiso } = require('./Permission');
 const { Bitacora } = require('./Bitacora');
 const { DigitoVerificador } = require('./DigitoVerificador');
 const PasswordResetToken = require('./PasswordResetToken');
@@ -17,7 +16,6 @@ const models = {
   Post,
   Comment,
   Calification,
-  Permiso,
   Bitacora,
   DigitoVerificador,
   PasswordResetToken,

@@ -186,25 +186,38 @@ function ModeratorPanel() {
   };
 
 const handleReportAction = async (action) => {
+    console.log('🔥 handleReportAction called with action:', action);
+
     try {
       const token = localStorage.getItem('token');
 
+      // Extraer la acción del objeto si viene como {action: 'delete_content'}
+      const actualAction = typeof action === 'object' && action.action ? action.action : action;
+      console.log('🔥 Extracted actualAction:', actualAction);
+
       // Determinar el estado correcto según la acción
       let status;
-      if (action === 'resolve') {
+      if (actualAction === 'resolve') {
         status = 'resolved'; // Se marca como revisado pero no se elimina el contenido
-      } else if (action === 'delete_content') {
+      } else if (actualAction === 'delete_content') {
         status = 'resolved'; // Se resuelve el reporte porque el contenido fue eliminado
       } else {
         status = 'dismissed'; // Se descarta el reporte
       }
 
+      const requestBody = {
+        status,
+        action: actualAction === 'delete_content' ? 'delete_content' : null
+      };
+
+      console.log('🔥 Frontend sending request:', {
+        reportId: selectedReport.id,
+        requestBody
+      });
+
       const response = await axios.put(
         `http://localhost:3000/api/moderator/reports/${selectedReport.id}`,
-        {
-          status,
-          action: action === 'delete_content' ? 'delete_content' : null
-        },
+        requestBody,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
 

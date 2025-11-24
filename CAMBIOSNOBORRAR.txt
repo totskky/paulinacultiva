@@ -1,7 +1,0 @@
-
-// arreglar
-estrellas en dialog extendido no dejan poner media estrella.
-"Cuenta desactivada, cualquier cosa contacte a soporte." 
-
-//
-revisar registro, se registra el usuario como pendiente antes de envoarte a verificacion y no te deja volvoer a registrarte.

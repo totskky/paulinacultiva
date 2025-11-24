@@ -52,12 +52,9 @@ async function ensureTables(modelsObj, sequelizeInstance) {
     try {
       const tableName = model.getTableName ? model.getTableName() : model.tableName || name;
       await qi.describeTable(tableName);
-      console.log(`Tabla existente: ${tableName}`);
     } catch (err) {
       try {
-        console.log(`Tabla no encontrada. Creando: ${name}`);
         await model.sync({ alter: false });
-        console.log(`Tabla creada: ${name}`);
       } catch (err2) {
         console.error(`Error creando tabla ${name}:`, err2);
         throw err2;

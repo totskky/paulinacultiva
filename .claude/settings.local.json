@@ -1,33 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)",
-      "Bash(cp:*)",
-      "Bash(rm:*)",
-      "Bash(npm install:*)",
-      "Bash(tree:*)",
-      "Bash(find:*)",
-      "Bash(npm uninstall:*)",
-      "Bash(node:*)",
-      "Bash(npm start)",
-      "Bash(curl:*)",
-      "Bash(cat:*)",
-      "Bash(tasklist:*)",
-      "Bash(findstr:*)",
-      "Bash(taskkill:*)",
-      "Bash(nul:*)",
-      "Bash(netstat:*)",
-      "Bash(npx kill-port:*)",
-      "Bash(pkill:*)",
-      "Bash(mysql:*)",
-      "Bash(npm run dev:*)",
-      "Bash(npx eslint:*)",
-      "Bash(timeout:*)",
-      "Bash(npm run build:*)",
-      "Bash(echo:*)",
-      "Bash(moderatorController.js)",
-      "Bash(git init:*)",
-      "Bash(git config:*)"
+      "Bash(powershell:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"Checking $file...\")",
+      "Bash(done:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

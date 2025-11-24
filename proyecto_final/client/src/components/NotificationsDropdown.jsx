@@ -80,7 +80,7 @@ const NotificationsDropdown = ({ userId }) => {
       case 'comment':
         return <MessageCircle {...iconProps} style={{ color: '#2196f3' }} />;
       case 'favorite':
-        return <Heart {...iconProps} style={{ color: '#ff9800' }} />;
+        return <Heart {...iconProps} style={{ color: '#e91e63' }} />;
       case 'friend_request':
         return <UserPlus {...iconProps} style={{ color: '#9c27b0' }} />;
       case 'friend_accept':

@@ -16,7 +16,6 @@ class NotificationService {
   static async notifyPostLike(postAuthorId, postId, userIdLiking) {
     try {
       await createLikeNotification(postAuthorId, postId, userIdLiking);
-      console.log(`✅ Notificación de like creada para usuario ${postAuthorId}`);
     } catch (error) {
       console.error('❌ Error al crear notificación de like:', error);
     }
@@ -28,7 +27,6 @@ class NotificationService {
   static async notifyPostComment(postAuthorId, postId, commentId, userIdCommenting) {
     try {
       await createCommentNotification(postAuthorId, postId, commentId, userIdCommenting);
-      console.log(`✅ Notificación de comentario creada para usuario ${postAuthorId}`);
     } catch (error) {
       console.error('❌ Error al crear notificación de comentario:', error);
     }
@@ -42,7 +40,6 @@ class NotificationService {
     try {
       const { createNotification } = require('../controller/notificationController');
       await createNotification(userId, title, message, type, relatedUserId, relatedPostId, relatedCommentId);
-      console.log(`✅ Notificación personalizada creada para usuario ${userId}`);
     } catch (error) {
       console.error('❌ Error al crear notificación personalizada:', error);
     }

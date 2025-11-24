@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, AppBar, Toolbar, Typography, Button, Container, Paper, Avatar, IconButton, Chip, InputAdornment, TextField, CircularProgress } from '@mui/material';
-import { ChefHat, Bell, Plus, Search, X, Shield } from 'lucide-react';
+import { ChefHat, Bell, Plus, Search, X, Shield, HelpCircle } from 'lucide-react';
 import { useToast, ToastContainer } from './Toast';
 import NotificationsDropdown from './NotificationsDropdown';
 import { COLORS } from '../utils/colors';
@@ -500,6 +500,37 @@ function Home() {
           </Box>
           </Box>
         </Container>
+      </Box>
+
+      {/* Botón flotante de soporte */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 1000,
+        }}
+      >
+        <IconButton
+          href="mailto:paulina.cultiva.rrhh@gmail.com?subject=Consulta%20de%20soporte%20-%20Paulina%20Cultiva&body=Hola%20Paulina%20Cultiva,%0D%0A%0D%0AEscribo%20para%20solicitar%20ayuda%20con:%0D%0A%0D%0A[Tu%20consulta%20aquí]"
+          sx={{
+            backgroundColor: COLORS.principal,
+            color: 'white',
+            width: 56,
+            height: 56,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            '&:hover': {
+              backgroundColor: COLORS.principalHover || COLORS.principal,
+              transform: 'scale(1.05)',
+              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
+            },
+            transition: 'all 0.3s ease-in-out',
+          }}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <HelpCircle size={24} fill="white" />
+        </IconButton>
       </Box>
     </>
   );

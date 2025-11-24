@@ -1,5 +1,6 @@
 const { Favorite } = require("../models/Favorite");
 const { Post } = require("../models/Post");
+const NotificationService = require('../services/notificationService');
 
 async function toggleFavorite(req, res) {
   const { postId } = req.params;
@@ -24,6 +25,18 @@ async function toggleFavorite(req, res) {
       // Si no existe, crearlo
       await Favorite.create({ userId, postId });
       isFavorite = true;
+
+      // Enviar notificación de favorito al autor del post
+      if (post && post.autorId !== userId) {
+        await NotificationService.notifyUser(
+          post.autorId,
+          'Nuevo favorito en tu receta',
+          `Alguien agregó tu receta "${post.titulo}" a favoritos`,
+          'favorite',
+          userId,
+          postId
+        );
+      }
     }
 
     // Contar el total de favoritos para este post

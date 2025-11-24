@@ -9,7 +9,6 @@ function agregarHooksDV(modelo, nombreTabla) {
   modelo.addHook('afterCreate', async (registro, options) => {
     try {
       await actualizarDigitosVerificadores(modelo, nombreTabla);
-      console.log(`✅ DVH actualizado después de CREATE en ${nombreTabla} (ID: ${registro.id})`);
     } catch (error) {
       console.warn(`⚠️ Error en hook afterCreate para DV de ${nombreTabla}:`, error.message);
       await registrarErrorIntegridad(
@@ -25,7 +24,6 @@ function agregarHooksDV(modelo, nombreTabla) {
   modelo.addHook('afterUpdate', async (registro, options) => {
     try {
       await actualizarDigitosVerificadores(modelo, nombreTabla);
-      console.log(`✅ DVH actualizado después de UPDATE en ${nombreTabla} (ID: ${registro.id})`);
     } catch (error) {
       console.warn(`⚠️ Error en hook afterUpdate para DV de ${nombreTabla}:`, error.message);
       await registrarErrorIntegridad(
@@ -41,7 +39,6 @@ function agregarHooksDV(modelo, nombreTabla) {
   modelo.addHook('afterDestroy', async (registro, options) => {
     try {
       await actualizarDigitosVerificadores(modelo, nombreTabla);
-      console.log(`✅ DVH actualizado después de DELETE en ${nombreTabla} (ID: ${registro.id})`);
     } catch (error) {
       console.warn(`⚠️ Error en hook afterDestroy para DV de ${nombreTabla}:`, error.message);
       await registrarErrorIntegridad(
@@ -57,7 +54,6 @@ function agregarHooksDV(modelo, nombreTabla) {
   modelo.addHook('afterBulkCreate', async (registros, options) => {
     try {
       await actualizarDigitosVerificadores(modelo, nombreTabla);
-      console.log(`✅ DVH actualizado después de BULK_CREATE en ${nombreTabla} (${registros.length} registros)`);
     } catch (error) {
       console.warn(`⚠️ Error en hook afterBulkCreate para DV de ${nombreTabla}:`, error.message);
       await registrarErrorIntegridad(
@@ -73,7 +69,6 @@ function agregarHooksDV(modelo, nombreTabla) {
   modelo.addHook('afterBulkUpdate', async (options) => {
     try {
       await actualizarDigitosVerificadores(modelo, nombreTabla);
-      console.log(`✅ DVH actualizado después de BULK_UPDATE en ${nombreTabla}`);
     } catch (error) {
       console.warn(`⚠️ Error en hook afterBulkUpdate para DV de ${nombreTabla}:`, error.message);
       await registrarErrorIntegridad(
@@ -89,7 +84,6 @@ function agregarHooksDV(modelo, nombreTabla) {
   modelo.addHook('afterBulkDestroy', async (options) => {
     try {
       await actualizarDigitosVerificadores(modelo, nombreTabla);
-      console.log(`✅ DVH actualizado después de BULK_DESTROY en ${nombreTabla}`);
     } catch (error) {
       console.warn(`⚠️ Error en hook afterBulkDestroy para DV de ${nombreTabla}:`, error.message);
       await registrarErrorIntegridad(

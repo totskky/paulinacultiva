@@ -6,6 +6,7 @@ import Register from "./components/Register.jsx";
 import PasswordRecovery from "./components/PasswordRecovery.jsx";
 import EmailVerification from "./components/EmailVerification.jsx";
 import ResetPassword from "./components/ResetPassword.jsx";
+import InactiveAccountScreen from "./components/InactiveAccountScreen.jsx";
 import Home from "./components/Home.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/email-verification" element={<EmailVerification />} />
         <Route path="/forgot-password" element={<PasswordRecovery />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/inactive-account" element={<InactiveAccountScreen />} />
         <Route
           path="/home"
           element={

@@ -44,9 +44,6 @@ const requestPasswordReset = async (req, res) => {
       isUsed: false
     });
 
-    console.log('🔑 Token generado:', resetToken);
-    console.log('👤 Para usuario:', user.email);
-    console.log('⏰ Expira:', expiresAt);
 
     res.status(200).json({
       success: true,
@@ -76,13 +73,11 @@ const verifyResetToken = async (req, res) => {
       });
     }
 
-    console.log('🔍 Verificando token:', token);
 
     // Buscar token en memoria
     const tokenData = tokenStore.get(token);
 
     if (!tokenData) {
-      console.log('❌ Token no encontrado en memoria');
       return res.status(400).json({
         success: false,
         message: 'Token inválido o no encontrado'
@@ -91,7 +86,6 @@ const verifyResetToken = async (req, res) => {
 
     // Verificar si no ha sido usado
     if (tokenData.isUsed) {
-      console.log('❌ Token ya fue usado');
       return res.status(400).json({
         success: false,
         message: 'Este token ya ha sido utilizado'
@@ -102,7 +96,6 @@ const verifyResetToken = async (req, res) => {
     const now = new Date();
     const expiresAt = new Date(tokenData.expiresAt);
     if (now > expiresAt) {
-      console.log('❌ Token expirado');
       return res.status(400).json({
         success: false,
         message: 'Token expirado. Solicita un nuevo restablecimiento'
@@ -115,14 +108,12 @@ const verifyResetToken = async (req, res) => {
     });
 
     if (!user) {
-      console.log('❌ Usuario no encontrado');
       return res.status(400).json({
         success: false,
         message: 'Usuario no encontrado'
       });
     }
 
-    console.log('✅ Token válido para usuario:', user.email);
 
     res.status(200).json({
       success: true,
@@ -162,13 +153,11 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    console.log('🔄 Reseteando contraseña con token:', token);
 
     // Buscar token en memoria
     const tokenData = tokenStore.get(token);
 
     if (!tokenData) {
-      console.log('❌ Token no encontrado');
       return res.status(400).json({
         success: false,
         message: 'Token inválido o no encontrado'
@@ -220,7 +209,6 @@ const resetPassword = async (req, res) => {
     // Marcar token como usado
     tokenData.isUsed = true;
 
-    console.log('✅ Contraseña actualizada para usuario:', user.email);
 
     res.status(200).json({
       success: true,
@@ -242,7 +230,6 @@ const cleanExpiredTokens = () => {
   for (const [token, data] of tokenStore.entries()) {
     if (new Date(data.expiresAt) < now) {
       tokenStore.delete(token);
-      console.log('🧹 Token expirado eliminado:', token.substring(0, 10) + '...');
     }
   }
 };

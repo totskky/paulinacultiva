@@ -114,32 +114,37 @@ const User = sequelize.define('Usuario', {
 });
 
 // Configurar hooks de bitácora para el modelo Usuario (temporalmente deshabilitado)
-// console.log('⚙️ Configurando hooks de bitácora para el modelo Usuario...');
 // configurarHooksBitacora(User, 'Usuario', {
 //   criticidad: nivelesCriticidad.seguridad, // Operaciones de usuarios son de seguridad
 //   registrarCreacion: true,
 //   registrarModificacion: true,
 //   registrarBorrado: true
 // });
-// console.log('✅ Hooks de bitácora configurados para Usuario');
 
 // Configurar hooks de DVH para el modelo Usuario (temporalmente deshabilitado)
-// console.log('⚙️ Configurando hooks DVH para el modelo Usuario...');
 agregarHooksDV(User, 'usuarios');
 
 // Definir asociaciones
 User.associate = (models) => {
     User.hasMany(models.Comment, {
         foreignKey: 'autorId',
-        as: 'comentarios'
+        as: 'comentarios',
+        onDelete: 'CASCADE'
     });
     User.hasMany(models.Post, {
         foreignKey: 'autorId',
-        as: 'posts'
+        as: 'posts',
+        onDelete: 'CASCADE'
     });
     User.hasMany(models.Favorite, {
         foreignKey: 'userId',
-        as: 'favorites'
+        as: 'favorites',
+        onDelete: 'CASCADE'
+    });
+    User.hasMany(models.Notification, {
+        foreignKey: 'userId',
+        as: 'notifications',
+        onDelete: 'CASCADE'
     });
 };
 

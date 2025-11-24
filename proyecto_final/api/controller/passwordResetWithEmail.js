@@ -61,7 +61,7 @@ const requestPasswordReset = async (req, res) => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Restablecimiento de Contraseña - Paulina Cultura</title>
+        <title>Restablecimiento de Contraseña - Paulina Cultiva</title>
         <style>
           * {
             margin: 0;
@@ -224,7 +224,7 @@ const requestPasswordReset = async (req, res) => {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Paulina Cultura</h1>
+            <h1>Paulina Cultiva</h1>
             <p>Restablecimiento de Contraseña</p>
           </div>
 
@@ -261,13 +261,13 @@ const requestPasswordReset = async (req, res) => {
 
             <p class="instructions" style="margin-top: 30px;">
               <em>Si no solicitaste este restablecimiento, por favor contacta
-              con soporte de Paulina Cultura.</em>
+              con soporte de Paulina Cultiva.</em>
             </p>
           </div>
 
           <div class="footer">
             <p>
-              © 2024 <a href="#" class="logo-text">Paulina Cultura</a><br>
+              © 2024 <a href="#" class="logo-text">Paulina Cultiva</a><br>
               Todos los derechos reservados
             </p>
           </div>
@@ -280,7 +280,7 @@ const requestPasswordReset = async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: user.email,
-      subject: '🔄 Restablecimiento de Contraseña - Paulina Cultura',
+      subject: '🔄 Restablecimiento de Contraseña - Paulina Cultiva',
       html: emailHTML
     };
 
@@ -290,8 +290,6 @@ const requestPasswordReset = async (req, res) => {
 
       // En desarrollo, mostrar información adicional
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`📧 Email de restablecimiento enviado a ${user.email}`);
-        console.log('🔑 Token generado:', resetToken);
       }
 
       res.status(200).json({
@@ -304,7 +302,6 @@ const requestPasswordReset = async (req, res) => {
       console.error('Error al enviar email de restablecimiento:', emailError);
 
       // Fallback: mostrar token en consola si falla el email
-      console.log('🔑 Token generado (fallback):', resetToken);
 
       res.status(200).json({
         success: true,
@@ -334,7 +331,6 @@ const verifyResetToken = async (req, res) => {
       });
     }
 
-    console.log('🔍 Verificando token:', token);
 
     // Buscar token en base de datos
     const tokenData = await PasswordResetToken.findOne({
@@ -342,7 +338,6 @@ const verifyResetToken = async (req, res) => {
     });
 
     if (!tokenData) {
-      console.log('❌ Token no encontrado en la base de datos');
       return res.status(400).json({
         success: false,
         message: 'Token inválido o no encontrado'
@@ -351,7 +346,6 @@ const verifyResetToken = async (req, res) => {
 
     // Verificar si no ha sido usado
     if (tokenData.isUsed) {
-      console.log('❌ Token ya fue usado');
       return res.status(400).json({
         success: false,
         message: 'Este token ya ha sido utilizado'
@@ -360,7 +354,6 @@ const verifyResetToken = async (req, res) => {
 
     // Verificar si no ha expirado
     if (tokenData.isExpired()) {
-      console.log('❌ Token expirado');
       return res.status(400).json({
         success: false,
         message: 'Token expirado. Solicita un nuevo restablecimiento'
@@ -373,14 +366,12 @@ const verifyResetToken = async (req, res) => {
     });
 
     if (!user) {
-      console.log('❌ Usuario no encontrado');
       return res.status(400).json({
         success: false,
         message: 'Usuario no encontrado'
       });
     }
 
-    console.log('✅ Token válido para usuario:', user.email);
 
     res.status(200).json({
       success: true,
@@ -420,7 +411,6 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    console.log('🔄 Reseteando contraseña con token:', token);
 
     // Buscar token en base de datos
     const tokenData = await PasswordResetToken.findOne({
@@ -428,7 +418,6 @@ const resetPassword = async (req, res) => {
     });
 
     if (!tokenData) {
-      console.log('❌ Token no encontrado en la base de datos');
       return res.status(400).json({
         success: false,
         message: 'Token inválido o no encontrado'
@@ -478,7 +467,6 @@ const resetPassword = async (req, res) => {
     // Marcar token como usado
     await tokenData.update({ isUsed: true });
 
-    console.log('✅ Contraseña actualizada para usuario:', user.email);
 
     // Enviar email de confirmación de cambio de contraseña
     try {
@@ -488,7 +476,7 @@ const resetPassword = async (req, res) => {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Contraseña Actualizada - Paulina Cultura</title>
+          <title>Contraseña Actualizada - Paulina Cultiva</title>
           <style>
             * {
               margin: 0;
@@ -568,7 +556,7 @@ const resetPassword = async (req, res) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>Paulina Cultura</h1>
+              <h1>Paulina Cultiva</h1>
               <p>Contraseña Actualizada Exitosamente</p>
             </div>
 
@@ -594,7 +582,7 @@ const resetPassword = async (req, res) => {
 
             <div class="footer">
               <p>
-                © 2024 <a href="#" class="logo-text">Paulina Cultura</a><br>
+                © 2024 <a href="#" class="logo-text">Paulina Cultiva</a><br>
                 Todos los derechos reservados
               </p>
             </div>
@@ -606,11 +594,10 @@ const resetPassword = async (req, res) => {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: user.email,
-        subject: '✅ Contraseña Actualizada - Paulina Cultura',
+        subject: '✅ Contraseña Actualizada - Paulina Cultiva',
         html: confirmationHTML
       });
 
-      console.log('📧 Email de confirmación enviado a:', user.email);
     } catch (confirmationError) {
       console.error('Error al enviar email de confirmación:', confirmationError);
       // No fallar el proceso si no se puede enviar el email de confirmación
@@ -634,7 +621,6 @@ const resetPassword = async (req, res) => {
 setInterval(async () => {
   try {
     await PasswordResetToken.cleanExpiredTokens();
-    console.log('🧹 Tokens expirados limpiados automáticamente');
   } catch (error) {
     console.error('Error limpiando tokens expirados:', error);
   }

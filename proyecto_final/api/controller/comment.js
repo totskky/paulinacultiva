@@ -92,7 +92,6 @@ async function getComments(req, res) {
   const { postId } = req.params;
 
   try {
-    console.log(`💬 Obteniendo comentarios para postId=${postId}`);
 
     const post = await Post.findByPk(postId);
     if (!post) return res.status(404).json({ message: "Post no encontrado" });
@@ -110,7 +109,6 @@ async function getComments(req, res) {
       order: [['fechaComentario', 'ASC']]
     });
 
-    console.log(`💬 Comentarios encontrados: ${comentarios.length} comentarios activos para postId=${postId}`);
 
     // Formatear los comentarios para que coincidan con lo que espera el frontend
     const comentariosFormateados = comentarios.map(comment => ({

@@ -103,7 +103,7 @@ function Perfil() {
   };
 
   const handleEditProfile = async () => {
-    if (!editData.username.trim()) {
+    if (!editData.username || !editData.username.trim()) {
       showToast('El nombre de usuario no puede estar vacío', 'error', 3000);
       return;
     }
@@ -334,7 +334,13 @@ function Perfil() {
                 variant="outlined"
                 fullWidth
                 startIcon={<Settings />}
-                onClick={() => setEditDialogOpen(true)}
+                onClick={() => {
+                  setEditData(prev => ({
+                    ...prev,
+                    username: userData.username
+                  }));
+                  setEditDialogOpen(true);
+                }}
                 sx={{
                   mb: 2,
                   p: 2,
@@ -450,64 +456,74 @@ function Perfil() {
 
         {/* Edit Profile Dialog */}
         <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ color: COLORS.bodyText, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Settings size={24} />
-            Editar Perfil
-          </DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              fullWidth
-              label="Nombre de usuario"
-              value={editData.username}
-              onChange={(e) => setEditData(prev => ({ ...prev, username: e.target.value }))}
-              variant="outlined"
-              sx={{ mt: 2, mb: 3 }}
-            />
-            <Typography variant="subtitle2" sx={{ color: COLORS.mutedText, mb: 2, fontWeight: 600 }}>
-              Cambio de contraseña (opcional)
-            </Typography>
-            <TextField
-              fullWidth
-              type="password"
-              label="Contraseña actual"
-              value={editData.currentPassword}
-              onChange={(e) => setEditData(prev => ({ ...prev, currentPassword: e.target.value }))}
-              variant="outlined"
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              type="password"
-              label="Nueva contraseña"
-              value={editData.newPassword}
-              onChange={(e) => setEditData(prev => ({ ...prev, newPassword: e.target.value }))}
-              variant="outlined"
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              type="password"
-              label="Confirmar nueva contraseña"
-              value={editData.confirmPassword}
-              onChange={(e) => setEditData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-              variant="outlined"
-            />
-            <Typography variant="caption" sx={{ color: COLORS.mutedText, mt: 1, display: 'block' }}>
-              La contraseña debe tener al menos 6 caracteres. Deja los campos de contraseña vacíos si solo quieres cambiar el nombre.
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setEditDialogOpen(false)}>Cancelar</Button>
-            <Button
-              onClick={handleEditProfile}
-              variant="contained"
-              disabled={editLoading}
-              startIcon={editLoading ? <CircularProgress size={16} /> : <Settings size={16} />}
-            >
-              {editLoading ? 'Guardando...' : 'Guardar Cambios'}
-            </Button>
-          </DialogActions>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleEditProfile();
+          }}>
+            <DialogTitle sx={{ color: COLORS.bodyText, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Settings size={24} />
+              Editar Perfil
+            </DialogTitle>
+            <DialogContent>
+              <TextField
+                autoFocus
+                fullWidth
+                label="Nombre de usuario"
+                value={editData.username}
+                onChange={(e) => setEditData(prev => ({ ...prev, username: e.target.value }))}
+                variant="outlined"
+                sx={{ mt: 2, mb: 3 }}
+              />
+              <Typography variant="subtitle2" sx={{ color: COLORS.mutedText, mb: 2, fontWeight: 600 }}>
+                Cambio de contraseña (opcional)
+              </Typography>
+              <TextField
+                fullWidth
+                type="password"
+                label="Contraseña actual"
+                value={editData.currentPassword}
+                onChange={(e) => setEditData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                variant="outlined"
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                type="password"
+                label="Nueva contraseña"
+                value={editData.newPassword}
+                onChange={(e) => setEditData(prev => ({ ...prev, newPassword: e.target.value }))}
+                variant="outlined"
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                type="password"
+                label="Confirmar nueva contraseña"
+                value={editData.confirmPassword}
+                onChange={(e) => setEditData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                variant="outlined"
+              />
+              <Typography variant="caption" sx={{ color: COLORS.mutedText, mt: 1, display: 'block' }}>
+                La contraseña debe tener al menos 6 caracteres. Deja los campos de contraseña vacíos si solo quieres cambiar el nombre.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                type="button"
+                onClick={() => setEditDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={editLoading}
+                startIcon={editLoading ? <CircularProgress size={16} /> : <Settings size={16} />}
+              >
+                {editLoading ? 'Guardando...' : 'Guardar Cambios'}
+              </Button>
+            </DialogActions>
+          </form>
         </Dialog>
 
         {/* Delete Account Dialog */}
@@ -521,17 +537,16 @@ function Perfil() {
               ¿Estás seguro de que quieres desactivar tu cuenta?
             </Typography>
             <Alert severity="warning" sx={{ mb: 2 }}>
-              <strong>¿Qué sucede al desactivar tu cuenta?</strong>
+              <strong>⚠️ Advertencia importante:</strong>
               <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px' }}>
-                <li>✅ Tu perfil se ocultará temporalmente</li>
-                <li>✅ No podrás iniciar sesión con tu cuenta</li>
-                <li>✅ Tus recetas y comentarios permanecerán visibles</li>
-                <li>✅ Todos tus datos se conservan en el sistema</li>
-                <li>✅ Podrás reactivar tu cuenta contactando al soporte</li>
+                <li>❗ Tu cuenta será <strong>eliminada permanentemente después de 30 días</strong></li>
+                <li>🚫 No podrás iniciar sesión con tu cuenta desactivada</li>
+                <li>📄 Podrás reactivar tu cuenta antes de los 30 días usando tu contraseña</li>
+                <li>🗑️ Si no la reactivas, se eliminarán <strong>TODOS tus datos</strong> permanentemente</li>
               </ul>
             </Alert>
             <Typography variant="body2" sx={{ color: COLORS.mutedText }}>
-              Si cambias de opinión, puedes contactar al soporte para reactivar tu cuenta en cualquier momento.
+              <strong>Importante:</strong> Tras la desactivación, recibirás un enlace para reactivar o eliminar permanentemente tu cuenta. Si no tomas ninguna decisión, la cuenta se eliminará automáticamente después de 30 días.
             </Typography>
           </DialogContent>
           <DialogActions>

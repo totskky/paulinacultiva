@@ -1,4 +1,4 @@
-const { User, Post, Comment, Calification, Friendship, DigitoVerificador, PasswordResetToken } = require('../models');
+const { User, Post, Comment, Calification, DigitoVerificador, PasswordResetToken } = require('../models');
 const { agregarContexto } = require('../middlewares/contextMiddleware');
 
 class AdminController {
@@ -156,16 +156,6 @@ class AdminController {
       try {
         // Primero eliminar tokens de restablecimiento de contraseña
         await PasswordResetToken.destroy({ where: { userId } });
-
-        // Eliminar amistades donde el usuario está involucrado
-        await Friendship.destroy({
-          where: {
-            [Friendship.sequelize.Sequelize.Op.or]: [
-              { userId },
-              { friendId: userId }
-            ]
-          }
-        });
 
         // Eliminar calificaciones del usuario
         await Calification.destroy({ where: { userId } });
@@ -404,14 +394,6 @@ class AdminController {
       for (const user of users) {
         try {
           await PasswordResetToken.destroy({ where: { userId: user.id } });
-          await Friendship.destroy({
-            where: {
-              [Friendship.sequelize.Sequelize.Op.or]: [
-                { userId: user.id },
-                { friendId: user.id }
-              ]
-            }
-          });
           await Calification.destroy({ where: { userId: user.id } });
           await Comment.destroy({ where: { autorId: user.id } });
           await Post.destroy({ where: { autorId: user.id } });

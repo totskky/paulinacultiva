@@ -2,23 +2,19 @@ const { User } = require('../models');
 
 // Middleware para verificar si el usuario es moderador
 const isModerator = async (req, res, next) => {
-  console.log(`🛡️ Middleware isModerator - ${req.method} ${req.originalUrl}`);
 
   try {
     if (!req.user) {
-      console.log(`❌ Usuario no autenticado en isModerator`);
       return res.status(401).json({
         success: false,
         message: 'Usuario no autenticado'
       });
     }
 
-    console.log(`✅ Usuario en isModerator:`, { id: req.user.id, username: req.user.username, role: req.user.role });
 
     const user = await User.findByPk(req.user.id);
 
     if (!user || user.estado !== 'activo') {
-      console.log(`❌ Usuario no encontrado o inactivo:`, { user: !!user, estado: user?.estado });
       return res.status(401).json({
         success: false,
         message: 'Usuario no encontrado o inactivo'
@@ -26,14 +22,12 @@ const isModerator = async (req, res, next) => {
     }
 
     if (user.role !== 'moderator') {
-      console.log(`❌ Usuario no es moderador. Role actual:`, user.role);
       return res.status(403).json({
         success: false,
         message: 'Acceso denegado. Se requiere rol de moderador'
       });
     }
 
-    console.log(`✅ Usuario validado como moderador:`, user.username);
 
     req.moderator = user;
     next();

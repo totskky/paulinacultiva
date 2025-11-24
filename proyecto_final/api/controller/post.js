@@ -79,7 +79,6 @@ const getPosts = async (req, res) => {
 
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    console.log(`📋 Obteniendo posts: page=${page}, limit=${limit}, search=${search}`);
 
     const posts = await Post.findAndCountAll({
       where: {
@@ -91,7 +90,6 @@ const getPosts = async (req, res) => {
       order: [['fechaPublicacion', 'DESC']]
     });
 
-    console.log(`📋 Posts encontrados: ${posts.count} total, mostrando ${posts.rows.length} posts`);
 
     // Obtener usernames para cada post
     const postsWithAuthors = await Promise.all(

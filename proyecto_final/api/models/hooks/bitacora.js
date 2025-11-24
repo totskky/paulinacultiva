@@ -56,14 +56,12 @@ const obtenerMetadataRequest = (options) => {
 const afterCreateHook = (modelName, criticidad = nivelesCriticidad.contenido) => {
   return async (instance, options) => {
     try {
-      console.log(`🔔 Hook afterCreate ejecutado para ${modelName} - ID: ${instance.id}`);
 
       const usuario_id = obtenerUsuarioContexto(options);
       const metadata = obtenerMetadataRequest(options);
 
       const datos = instance.get({ plain: true });
 
-      console.log(`📊 Registrando en bitácora - Entidad: ${modelName}, Usuario: ${usuario_id}`);
 
       await registrarBitacora(instance.constructor.sequelize, {
         accion: 'CREAR',
@@ -77,7 +75,6 @@ const afterCreateHook = (modelName, criticidad = nivelesCriticidad.contenido) =>
         transaction: options.transaction
       });
 
-      console.log(`✅ Registro en bitácora completado para ${modelName}`);
     } catch (error) {
       console.error(`❌ Error en afterCreate hook para ${modelName}:`, error);
     }

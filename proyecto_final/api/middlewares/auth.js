@@ -3,7 +3,6 @@ const SECRET = process.env.JWT_SECRET || 'misecreto'
 const { User } = require("../models")
 
 const isAuth = async (req, res, next) => {
-    console.log(`🔐 Middleware isAuth - ${req.method} ${req.originalUrl}`);
 
     const authHeader = req.headers['authorization']
     if (!authHeader) return res.status(401).json({ message: "Token no proporcionado" })
@@ -13,23 +12,18 @@ const isAuth = async (req, res, next) => {
         ? authHeader.slice(7)
         : authHeader
 
-    console.log(`🔍 Token recibido: ${token.substring(0, 20)}...`);
 
     jwt.verify(token, SECRET, async (err, decoded) => {
         if (err) {
-            console.log(`❌ Error verificando token:`, err.message);
             return res.status(401).json({ message: "Token inválido o expirado" })
         }
 
-        console.log(`✅ Token decodificado:`, { userId: decoded.userId || decoded.id });
 
         const user = await User.findByPk(decoded.userId || decoded.id)
         if (!user) {
-            console.log(`❌ Usuario no encontrado en BD`);
             return res.status(404).json({ message: 'Usuario no encontrado' })
         }
 
-        console.log(`✅ Usuario autenticado:`, { id: user.id, username: user.username, role: user.role, estado: user.estado });
 
         req.user = user
         req.userId = user.id
